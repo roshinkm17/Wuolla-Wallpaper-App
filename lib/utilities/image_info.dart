@@ -1,0 +1,3 @@
+class ImageInfo {
+  String imageUrl;
+}
