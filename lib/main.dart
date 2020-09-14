@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wuolla_wallpapers/screens/home_page.dart';
-import 'constants.dart';
+import 'package:wuolla_wallpapers/screens/preview_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,7 +13,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: PreviewPage(),
     );
   }
 }
