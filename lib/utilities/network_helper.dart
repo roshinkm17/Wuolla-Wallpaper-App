@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 class NetworkHelper {
-  getDataFromUrl() async {
-    var response = await http.get(
-        'https://api.unsplash.com/photos/?client_id=fSD94zadGgOKuulDq1xLmLGlykZtYDOYBS-1iF-pQV8');
+  getDataFromUrl(var page, var queryTerm) async {
+    var url =
+        'https://api.unsplash.com/search/photos/?client_id=fSD94zadGgOKuulDq1xLmLGlykZtYDOYBS-1iF'
+        '-pQV8'
+        '&per_page=30&page=$page&query=$queryTerm';
+    var response = await http.get(url);
     if (response.statusCode == 200) {
       return response.body;
     } else {

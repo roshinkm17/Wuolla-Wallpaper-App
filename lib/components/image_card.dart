@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wuolla_wallpapers/constants.dart';
+import 'package:wuolla_wallpapers/screens/preview_page.dart';
 
 class ImageCard extends StatelessWidget {
   ImageCard({this.imagePreviewUrl, this.fullImageUrl});
@@ -8,14 +9,24 @@ class ImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        image: DecorationImage(
-          image: NetworkImage(imagePreviewUrl),
-          fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => PreviewPage(
+                      imageUrl: fullImageUrl,
+                    )));
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          image: DecorationImage(
+            image: NetworkImage(imagePreviewUrl),
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

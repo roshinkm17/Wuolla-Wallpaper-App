@@ -1,3 +1,0 @@
-class ImageInfo {
-  String imageUrl;
-}

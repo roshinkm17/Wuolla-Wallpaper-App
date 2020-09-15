@@ -1,10 +1,49 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:wuolla_wallpapers/constants.dart';
+import 'package:wuolla_wallpapers/screens/home_page.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
-class Categories extends StatelessWidget {
+class Categories extends StatefulWidget {
+  Categories({this.category});
+  final category;
+  @override
+  _CategoriesState createState() => _CategoriesState();
+}
+
+class _CategoriesState extends State<Categories> {
+  void initState() {
+    super.initState();
+    controller = AutoScrollController(
+        viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
+        axis: Axis.horizontal);
+    setState(() {
+      category = widget.category;
+      print("This is the category in the Category widget....$category");
+    });
+    for (int i = 0; i < selectedChip.length; i++) {
+      if (keyWords[i] == category) {
+        setState(() {
+          selectedChip[i] = true;
+          selectedIndex = i;
+        });
+      } else {
+        setState(() {
+          selectedChip[i] = false;
+        });
+      }
+    }
+    scrollToIndex();
+  }
+
+  Future scrollToIndex() async {
+    await controller.scrollToIndex(6, preferPosition: AutoScrollPosition.middle);
+  }
+
+  int selectedIndex = 0;
+  String category;
   final List<String> keyWords = [
-    'Abstract',
+    'Popular',
     'People',
     'Travel',
     'Patterns',
@@ -15,27 +54,51 @@ class Categories extends StatelessWidget {
     'Fashion',
     'Athletics',
   ];
+
+  List<bool> selectedChip = [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ];
+  AutoScrollController controller;
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 40,
       child: ListView.builder(
+        controller: controller,
         scrollDirection: Axis.horizontal,
         itemCount: keyWords.length,
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomePage(
+                            category: keyWords[index],
+                          )));
+            },
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 3),
               child: Chip(
                 elevation: 1,
                 label: AutoSizeText(
                   keyWords[index],
-                  style: TextStyle(color: teritiaryColor),
+                  style: TextStyle(
+                      color: selectedChip[index] == true ? secondaryColor : teritiaryColor),
                   maxLines: 1,
                   minFontSize: 8,
                 ),
-                backgroundColor: secondaryColor,
+                backgroundColor: selectedChip[index] == true ? primaryColor : secondaryColor,
               ),
             ),
           );
