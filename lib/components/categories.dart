@@ -36,8 +36,10 @@ class _CategoriesState extends State<Categories> {
     scrollToIndex();
   }
 
-  Future scrollToIndex() async {
-    await controller.scrollToIndex(6, preferPosition: AutoScrollPosition.middle);
+  scrollToIndex() async {
+    print("Called scroll to index... with selected index $selectedIndex");
+    await controller.scrollToIndex(selectedIndex,
+        preferPosition: AutoScrollPosition.middle, duration: Duration(seconds: 1));
   }
 
   int selectedIndex = 0;
@@ -77,28 +79,33 @@ class _CategoriesState extends State<Categories> {
         scrollDirection: Axis.horizontal,
         itemCount: keyWords.length,
         itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HomePage(
-                            category: keyWords[index],
-                          )));
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 3),
-              child: Chip(
-                elevation: 1,
-                label: AutoSizeText(
-                  keyWords[index],
-                  style: TextStyle(
-                      color: selectedChip[index] == true ? secondaryColor : teritiaryColor),
-                  maxLines: 1,
-                  minFontSize: 8,
+          return AutoScrollTag(
+            controller: controller,
+            index: index,
+            key: ValueKey(index),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomePage(
+                              category: keyWords[index],
+                            )));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 3),
+                child: Chip(
+                  elevation: 1,
+                  label: AutoSizeText(
+                    keyWords[index],
+                    style: TextStyle(
+                        color: selectedChip[index] == true ? secondaryColor : teritiaryColor),
+                    maxLines: 1,
+                    minFontSize: 8,
+                  ),
+                  backgroundColor: selectedChip[index] == true ? primaryColor : secondaryColor,
                 ),
-                backgroundColor: selectedChip[index] == true ? primaryColor : secondaryColor,
               ),
             ),
           );

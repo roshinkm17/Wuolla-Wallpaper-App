@@ -18,6 +18,11 @@ dependencies:
   path_provider:
   modal_progress_hud:
   scroll_to_index: any
+  wallpaper_manager: ^1.0.10
+  flutter_cache_manager: ^1.4.2
+  flutter_spinkit:
+  wallpaper: any
+  image_downloader: any
 
 dev_dependencies:
   flutter_test:

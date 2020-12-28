@@ -3,8 +3,9 @@ import 'package:wuolla_wallpapers/constants.dart';
 import 'package:wuolla_wallpapers/screens/preview_page.dart';
 
 class ImageCard extends StatelessWidget {
-  ImageCard({this.imagePreviewUrl, this.fullImageUrl});
+  ImageCard({this.imagePreviewUrl, this.regularImageUrl, this.fullImageUrl});
   final String imagePreviewUrl;
+  final String regularImageUrl;
   final String fullImageUrl;
 
   @override
@@ -15,7 +16,8 @@ class ImageCard extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => PreviewPage(
-                      imageUrl: fullImageUrl,
+                      previewImageUrl: regularImageUrl,
+                      downloadImageUrl: fullImageUrl,
                     )));
       },
       child: Container(

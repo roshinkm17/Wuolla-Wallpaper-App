@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:wuolla_wallpapers/components/image_card.dart';
+import 'package:wuolla_wallpapers/constants.dart';
 import 'package:wuolla_wallpapers/utilities/network_helper.dart';
 import 'dart:io';
+import 'dart:async';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Gallery extends StatefulWidget {
   Gallery({this.queryTerm});
@@ -16,6 +19,8 @@ class _GalleryState extends State<Gallery> {
   void initState() {
     super.initState();
     setState(() {
+      isLoading = true;
+      print("The value of isLoading is $isLoading....");
       queryTerm = widget.queryTerm == null ? 'wallpaper' : widget.queryTerm;
       fileName = 'CacheData_$queryTerm$cachePageNumber.json';
     });
@@ -99,50 +104,62 @@ class _GalleryState extends State<Gallery> {
         });
       }
     }
+    setState(() {
+      isLoading = false;
+    });
+    print("The value of isLoading is $isLoading....");
   }
 
   checkCache() async {
-    var cacheDir = await getTemporaryDirectory();
-    if (await File(cacheDir.path + '/' + fileName).exists()) {
-      //Load the data from cache
-      imageDataList['results'] = [];
-      print("Loading from cache....");
-      while (true) {
-        if (await File(cacheDir.path + '/' + fileName).exists()) {
-          print("Loading from cache page............from $fileName");
-          var jsonData = await File(cacheDir.path + '/' + fileName).readAsString();
-          setState(() {
-            imageDataList['results'].addAll(jsonDecode(jsonData)['results']);
-            cachePageNumber++;
-            fileName = 'CacheData_$queryTerm$cachePageNumber.json';
-          });
+    try{
+      var cacheDir = await getTemporaryDirectory();
+      if (await File(cacheDir.path + '/' + fileName).exists()) {
+        //Load the data from cache
+        imageDataList['results'] = [];
+        print("Loading from cache....");
+        while (true) {
+          if (await File(cacheDir.path + '/' + fileName).exists()) {
+            print("Loading from cache page............from $fileName");
+            var jsonData = await File(cacheDir.path + '/' + fileName).readAsString();
+            setState(() {
+              imageDataList['results'].addAll(jsonDecode(jsonData)['results']);
+              cachePageNumber++;
+              fileName = 'CacheData_$queryTerm$cachePageNumber.json';
+            });
+          } else {
+            break;
+          }
+        }
+      } else {
+        //Load the data from API call response
+        var response = await network.getDataFromUrl(page, queryTerm);
+        if (response == 404) {
+          print("Some Error.....");
         } else {
-          break;
+          print("Got API response.....");
+          print("Creating its cache....");
+          var tempDir = await getTemporaryDirectory();
+          File file = new File(tempDir.path + '/' + fileName);
+          file.writeAsString(
+            response,
+            flush: true,
+            mode: FileMode.write,
+          );
+          print("Data cached...");
+          setState(() {
+            imageDataList = jsonDecode(response);
+          });
         }
       }
-    } else {
-      //Load the data from API call response
-      var response = await network.getDataFromUrl(page, queryTerm);
-      if (response == 404) {
-        print("Some Error.....");
-      } else {
-        print("Got API response.....");
-        print("Creating its cache....");
-        var tempDir = await getTemporaryDirectory();
-        File file = new File(tempDir.path + '/' + fileName);
-        file.writeAsString(
-          response,
-          flush: true,
-          mode: FileMode.write,
-        );
-        print("Data cached...");
-        setState(() {
-          imageDataList = jsonDecode(response);
-        });
-      }
+      setState(() {
+        isLoading = false;
+      });
+    }catch(e){
+      print(e);
     }
   }
 
+  bool isLoading = false;
   String queryTerm;
   int cachePageNumber = 0;
   String fileName;
@@ -157,19 +174,31 @@ class _GalleryState extends State<Gallery> {
     final double itemHeight = (size.height - kToolbarHeight - 200) / 2;
     final double itemWidth = size.width / 2;
     return Expanded(
-      child: GridView.builder(
-        controller: _controller,
-        itemCount: imageDataList['results'] == null ? 0 : imageDataList['results'].length,
-        gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: (itemWidth / itemHeight),
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          return ImageCard(
-            imagePreviewUrl: imageDataList['results'][index]['urls']['small'],
-            fullImageUrl: imageDataList['results'][index]['urls']['regular'],
-          );
-        },
+      child: Stack(
+        children: <Widget>[
+          isLoading == false
+              ? GridView.builder(
+                  controller: _controller,
+                  itemCount: imageDataList['results'] == null ? 0 : imageDataList['results'].length,
+                  gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: (itemWidth / itemHeight),
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return ImageCard(
+                      imagePreviewUrl: imageDataList['results'][index]['urls']['small'],
+                      regularImageUrl: imageDataList['results'][index]['urls']['regular'],
+                      fullImageUrl: imageDataList['results'][index]['urls']['full'],
+                    );
+                  },
+                )
+              : Center(
+                  child: SpinKitCubeGrid(
+                    color: primaryColor,
+                    size: 50,
+                  ),
+                ),
+        ],
       ),
     );
   }
